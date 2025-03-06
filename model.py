@@ -4,6 +4,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from visualization import plot_confusion_matrix
+# from linear_regression import run_linear_regression
+# import numpy as np
 
 
 def user_test(model, vectorizer):
@@ -48,5 +51,11 @@ print("Accuracy:", accuracy_score(y_test, y_pred))
 print("\nClassification Report:\n", classification_report(y_test, y_pred))
 print("\nConfusion Matrix:\n", confusion_matrix(y_test, y_pred))
 
-
 user_test(model, vectorizer)
+
+plot_confusion_matrix(y_test, y_pred, title='Confusion Matrix')
+
+# np.random.seed(42)
+# X_lr = 2 * np.random.rand(100, 1)  # Feature
+# y_lr = 4 + 3 * X_lr + np.random.randn(100, 1)  # Target
+# run_linear_regression(X_lr, y_lr)
