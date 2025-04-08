@@ -7,7 +7,7 @@ model = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_l
 
 training_args = TrainingArguments(
     output_dir="./results_toxicity",
-    evaluation_strategy="epoch",
+    eval_strategy="epoch",
     per_device_train_batch_size=8,
     per_device_eval_batch_size=8,
     num_train_epochs=3,
