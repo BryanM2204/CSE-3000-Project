@@ -2,14 +2,16 @@ import pandas as pd
 from datasets import Dataset
 from transformers import BertTokenizer
 
-def load_and_prepare_dataset(file_path):
+def load_and_prepare_dataset(file_path, remove_none_targets=False):
     df = pd.read_csv(file_path)
 
-    # Drop rows with bad labels
     df = df[['text', 'label', 'target']]
-    df = df[(df['target'] != 'none') & (df['target'] != 'notgiven')]
 
-    # Map labels
+    if remove_none_targets:
+        # Only remove "none" and "notgiven" if doing bias classification
+        df = df[(df['target'] != 'none') & (df['target'] != 'notgiven')]
+
+    # Map labels: hate -> 1, nothate -> 0
     df['label'] = df['label'].apply(lambda x: 1 if x == 'hate' else 0)
 
     # Map targets
