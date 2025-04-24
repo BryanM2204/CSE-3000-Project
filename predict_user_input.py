@@ -3,32 +3,55 @@ import torch
 
 # Load tokenizer and models
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-model_toxic = BertForSequenceClassification.from_pretrained("./results_toxicity")
-model_target = BertForSequenceClassification.from_pretrained("./results_target")
+model_toxic = BertForSequenceClassification.from_pretrained("./results_toxicity", local_files_only=True)
+model_bias = BertForSequenceClassification.from_pretrained("./results_bias_binary", local_files_only=True)
 
-# Mapping
-target_labels = ['notgiven', 'none', 'dis', 'trav', 'mus', 'bla', 'trans', 'wom', 'wc', 'bla.wom', 'pol', 'jew', 'indig', 'for', 'asi.south', 'asi.east', 'mixed.race', 'ethnic.minority', 'gendermin', 'gay', 'asi', 'immig', 'gay.wom', 'arab', 'hispanic', 'gay.man', 'ref', 'nazis', 'asi.chin', 'notargetrecorded', 'non.white', 'asi.wom', 'asi.pak', 'african', 'old.people', 'hitler', 'dis, gay', 'bla.man', 'mus, arab, other.religion', 'mus, jew', 'nan', 'asylum', 'mus.wom', 'bla, asi', 'bis', 'bla, gay', 'asi.man', 'russian', 'indig.wom', 'bla, immig', 'lgbtq', 'for, immig', 'bla, mixed.race', 'pol, eastern.europe', 'bla.wom, bla.man', 'mus, arab', 'asi, asi.chin', 'asi.south, asi.pak', 'eastern.europe', 'trans, gay, gay.wom, bis', 'arab, asi.chin', 'dis, wom', 'non.white.wom', 'other.religion', 'wom, mus.wom', 'gay, gay.wom', 'trans, gendermin', 'mixed.race, non.white', 'bla.wom, asi.chin', 'asi.south, arab', 'other.national', 'dis, wc', 'dis, mus, wc', 'trans, asi.wom', 'trans, for', 'trans, gay', 'bla, trans, gay', 'bla, trans', 'dis, for', 'mus, trans', 'dis, bla, trans, mixed.race, gay', 'dis, bla', 'dis, asi.man', 'mixed.race, gay', 'wom, bla.wom', 'trans, wom', 'mus, asi.pak', 'bla, ethnic.minority', 'bla, asi, non.white', 'dis, ref', 'gendermin, gay.wom, gay.man', 'arab, african', 'dis, asi.chin', 'bla, gay.wom, gay.man', 'pol, arab', 'bla, wom', 'gay.wom, gay.man', 'wom, pol', 'trans, gendermin, gay', 'other.glorification', 'asi.south, immig', 'dis, trans', 'trans, wom, gay', 'dis, mixed.race', 'trans, lgbtq', 'jew, other.religion', 'jew, asi.chin', 'wom, asi.pak', 'trav, wom', 'mixed.race, asi.chin', 'wom, gay.man', 'mus, immig', 'jew, ethnic.minority', 'bla, jew', 'immig, ref', 'mus, asylum', 'trans, gay.man', 'dis, bla, wom', 'jew, non.white', 'mus, bla, trans, jew', 'wom, gay', 'bla, asi.south, arab, asi.pak', 'bla, bla.wom', 'bla, bla.man', 'bla, gay.man', 'mixed.race, immig', 'jew, immig', 'immig, ref, asylum', 'immig, non.white', 'bla, asi, hispanic', 'bla, jew, non.white', 'mixed.race, hispanic, non.white', 'dis, gay.man', 'bla, arab, hispanic, non.white', 'for, non.white', 'mus, non.white', 'wom, jew, non.white', 'jew, bla.man', 'dis, african', 'bla, asi.south, asi.chin, non.white, asi.pak', 'asi, non.white', 'mus, mus.wom', 'bla, hispanic', 'for, bla.man', 'asi.south, hispanic', 'jew, asi, non.white', 'bla, non.white', 'immig, hispanic', 'gay, non.white', 'hispanic, non.white', 'mus, wom', 'asi.south, asi', 'wom, asi.south', 'wom, jew, gendermin', 'bla, jew, asi', 'bla, jew, asi, non.white', 'bla, jew, mixed.race, asi', 'trav, wc', 'trans, gendermin, non.white', 'wom, non.white', 'wom, jew, gay', 'wom, for', 'bla, trans, jew, gay, arab', 'trav, mus, hispanic', 'gay, gay.wom, bis', 'indig, non.white, african', 'dis, gay.wom, gay.man', 'indig, asi.south, asi, african', 'bla.wom, non.white, asi.wom', 'mus, bla', 'trans, wom, pol, asi.south', 'trans, gay.wom, gay.man', 'jew, arab', 'bla.wom, asi.south, mixed.race', 'bla, jew, hispanic', 'dis, mixed.race, non.white', 'trans, wom, gendermin, gay', 'asi.south, african', 'trans, gendermin, bis', 'mixed.race, arab, hispanic, non.white', 'bla, for', 'bla, jew, gay', 'dis, ethnic.minority', 'bla, jew, gay.man', 'immig, asylum', 'wom, gendermin', 'trans, wom, jew, gay, bis', 'ethnic.minority, immig', 'arab, ref', 'jew, gay', 'mus, jew, immig', 'bla.wom, jew', 'wom, asi', 'for, asi.east', 'trans, bis', 'dis, trans, gay', 'trans, wom, non.white', 'bla, for, ref', 'bla, ref', 'bla, arab', 'gendermin, arab', 'bla, jew, arab', 'dis, immig', 'bla, asi.wom', 'asi, asi.wom', 'mixed.race, asi', 'hispanic, african', 'trans, gay.wom', 'bla, trans, gay.man', 'asi.east, gay', 'trans, gay.wom, gay.man, bis', 'wom, asi.wom', 'bla.wom, gay.man', 'mus, bla, jew, asi.chin', 'bla.wom, non.white', 'wom, ethnic.minority', 'bla, jew, mixed.race', 'bla, asi.south, mixed.race, arab, asi.pak', 'pol, jew, gay.man, russian', 'wom, gay.wom', 'trans, gay, bis', 'gendermin, gay', 'mus, jew, arab', 'dis, non.white, african', 'bla, wom, non.white', 'jew, gay.man', 'wom, jew', 'bla, wom, gay', 'pol, russian', 'bla, wom, jew, mixed.race', 'wom, gay.wom, gay.man', 'bla, asi.south', 'gay.man, bis', 'mus, bla, non.white', 'wom, mixed.race', 'dis, trans, gendermin', 'mus, ref', 'mus, jew, immig, arab', 'dis, bla, wom, jew, arab, non.white', 'wom, jew, mixed.race, non.white', 'jew, mixed.race', 'mus, african', 'asi.east, non.white', 'mus, arab, non.white, asi.pak', 'trans, jew', 'gendermin, gay.wom, bis', 'mus, bla, immig, non.white', 'jew, mixed.race, non.white', 'asi, non.white, african', 'nazis, hitler', 'trans, immig', 'asi.south, gay', 'asi.south, asi.east', 'asi, hispanic', 'wom, hispanic', 'asi.south, mixed.race', 'dis, bla, wom, gay, immig', 'asi.east, asi', 'jew, gendermin', 'gay, gay.man', 'dis, gendermin', 'mus, bla, trans, jew, gay, hispanic', 'for, ref', 'wc, immig', 'bla, asi.east', 'trans, immig, non.white', 'bla, jew, asi.south', 'trans, wom, gay.wom, gay.man, non.white, bis', 'trans, gendermin, gay.man', 'non.white, bla.man', 'jew, gay, asi.chin', 'gay, ref', 'bla, bla.wom, mixed.race, non.white', 'bla, trans, jew, arab, gay.man, asi.chin', 'trans, wom, jew, gendermin', 'trans, wom, gendermin', 'bla, african', 'jew, ref', 'bla, jew, african', 'asi.chin, african', 'mus, asi.south', 'dis, bla, ref', 'mus, gay', 'gay, bis', 'gendermin, bis', 'gay.wom, gay.man, bis', 'gay.wom, gay.man, non.white', 'gay, arab, african', 'dis, mus, wom', 'mus, bla, gay', 'trans, gay, non.white', 'dis, indig', 'wom, wc', 'wc, eastern.europe', 'bla, wc', 'immig, eastern.europe', 'bla, gay, gay.wom', 'indig, mixed.race', 'bla, indig', 'jew, immig, non.white', 'asi.south, immig, asi.chin, non.white', 'asi, asi.man', 'asi.east, hispanic', 'bla, jew, indig', 'jew, mixed.race, asi.wom', 'non.white, asi.wom, asi.man', 'wom, asi.east', 'non.white, bla.man, asi.man', 'bla.man, asi.man', 'asi.south, asi.chin', 'dis, asi.south', 'bla, wom, jew, asi', 'bla, jew, immig, hispanic', 'bla, asi.chin', 'bla, asi.pak', 'immig, asi.wom', 'trav, bla, indig, arab, hispanic', 'mixed.race, asi, asi.wom', 'asi.south, asi.chin, asi.pak', 'immig, asi.pak', 'bla, mixed.race, non.white', 'asi.wom, bla.man', 'trans, gendermin, gay, gay.wom, bis', 'trans, gendermin, gay, gay.wom', 'dis, asi.east', 'wc, immig, ref', 'mus, bla, non.white, african', 'bla, mixed.race, gay', 'bla, for, asi.south', 'bla, trans, jew', 'mus, bla, asi.south, non.white', 'bla.wom, mixed.race', 'wc, asi.south', 'trav, jew, gendermin', 'trav, asi.south', 'bla, wom, immig', 'asi.east, ref', 'mus, wom, for, asi.east, immig', 'ref, non.white', 'african, asylum', 'immig, asi.chin', 'indig, ref', 'mus, immig, ref', 'dis, bla, non.white', 'gendermin, non.white', 'trav, bla, jew', 'wom, arab', 'trav, jew', 'trav, bla', 'bla, lgbtq', 'trav, jew, arab', 'ref, lgbtq', 'trav, gendermin', 'dis, trans, bis', 'trav, gendermin, immig', 'mus, bla, arab', 'mus, gay.wom', 'mus, mixed.race, immig', 'indig, gendermin, gay', 'indig, indig.wom', 'trav, eastern.europe', 'bla, old.people', 'mus, hispanic', 'wom, immig', 'mus, mixed.race', 'dis, bla, hispanic', 'bla, mixed.race, gendermin', 'wom, jew, mixed.race', 'bla, trans, mixed.race, gay.man', 'mus, gay, immig', 'mus, gendermin', 'mus, wom, immig', 'bla, wom, mixed.race', 'bla, indig, asi, hispanic', 'hispanic, asi.man', 'mus, bla, jew, mixed.race', 'asi.east, asi.chin', 'asi, immig, asi.chin', 'wom, bla.man', 'wom, asi.chin', 'bla.wom, asi.south', 'for, hispanic', 'jew, for, hispanic', 'for, gay', 'dis, for, hispanic', 'bla, wom, hispanic, lgbtq', 'bla, wom, gay.man', 'trav, indig', 'immig, arab, ref', 'mus, hispanic, ref', 'wom, bis', 'trans, gay, gay.wom', 'indig, asi.south', 'asi.south, immig, asi.pak', 'dis, mus', 'gendermin, gay.wom', 'asi, asi.chin, asi.wom', 'jew, mus.wom', 'gay, lgbtq', 'asi.chin, asi.pak', 'immig, african', 'bla, jew, asi.east', 'bla, gay, non.white', 'dis, trans, wom, gendermin', 'mus, arab, african', 'bla, asi.east, hispanic', 'jew, indig', 'trav, arab', 'arab, ref, african', 'jew, mixed.race, gay']  # <-- paste your list of target labels here
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model_toxic.to(device)
-model_target.to(device)
+model_bias.to(device)
+
+# Rule-based bias keyword detection
+BIAS_KEYWORDS = {
+    "gender": ["woman", "man", "girl", "boy", "feminist", "trans"],
+    "race": ["black", "white", "asian", "mexican", "arab", "hispanic"],
+    "religion": ["muslim", "jew", "christian", "hindu", "islamic"],
+    "disability": ["retard", "cripple", "dumb", "disabled", "r3t4rd"],
+    "nationality": ["american", "chinese", "african", "european"]
+}
+
+def detect_bias_keywords(text):
+    text = text.lower()
+    matches = set()
+    for category, keywords in BIAS_KEYWORDS.items():
+        for kw in keywords:
+            if kw in text:
+                matches.add(category)
+    return list(matches)
 
 def predict(text):
     inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
     inputs = {k: v.to(device) for k, v in inputs.items()}
 
-    # Toxicity
+    # Toxicity prediction
     outputs_toxic = model_toxic(**inputs)
     pred_toxic = torch.argmax(outputs_toxic.logits, dim=1).item()
+    toxic_conf = torch.softmax(outputs_toxic.logits, dim=1)[0][pred_toxic].item()
 
-    # Target
-    outputs_target = model_target(**inputs)
-    pred_target = torch.argmax(outputs_target.logits, dim=1).item()
+    # Bias prediction (binary)
+    outputs_bias = model_bias(**inputs)
+    pred_bias = torch.argmax(outputs_bias.logits, dim=1).item()
+    bias_conf = torch.softmax(outputs_bias.logits, dim=1)[0][pred_bias].item()
+
+    matched_keywords = detect_bias_keywords(text)
 
     toxic_label = "Toxic" if pred_toxic == 1 else "Non-Toxic"
-    target_label = target_labels[pred_target]
+    bias_label = "Targets a demographic group" if pred_bias == 1 else "Not group-targeted"
 
-    print(f"Prediction: {toxic_label}")
-    print(f"Target demographic (if toxic): {target_label}")
+    print(f"\nText: {text}")
+    print(f"Prediction \u2192 {toxic_label} (Confidence: {toxic_conf:.2%})")
+    print(f"Bias       \u2192 {bias_label} (Confidence: {bias_conf:.2%})")
+    if matched_keywords:
+        print(f"Bias types \u2192 {', '.join(matched_keywords)}")
 
 if __name__ == "__main__":
     while True:
