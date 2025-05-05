@@ -3,31 +3,53 @@ from datasets import Dataset
 from transformers import BertTokenizer
 
 def load_and_prepare_dataset(file_path, binary_bias=False):
+    # Load and preprocess data
     df = pd.read_csv(file_path)
     df = df[['text', 'label', 'target']]
 
     if binary_bias:
-        # Binary bias model: 1 = group targeted, 0 = none/notgiven
-        df['bias'] = df['target'].apply(lambda t: 0 if t == 'none' else 1)
+        # Binary classification setup (toxicity/bias detection)
+        df['labels'] = df['target'].apply(
+            lambda t: 0 if t == 'none' else 1
+        ).astype(int)
+        df = df[['text', 'labels']]  # Keep only necessary columns
+        
     else:
+        # Multiclass setup (target group classification)
         df = df[(df['target'] != 'none') & (df['target'] != 'notgiven')]
-        df['label'] = df['label'].apply(lambda x: 1 if x == 'hate' else 0)
+        df['label'] = df['label'].apply(
+            lambda x: 1 if x == 'hate' else 0
+        ).astype(int)
+        
+        # Create target mapping
         target_labels = df['target'].unique().tolist()
         target2id = {label: i for i, label in enumerate(target_labels)}
-        df['target_id'] = df['target'].map(target2id)
+        id2target = {i: label for label, i in target2id.items()}
+        
+        df['labels'] = df['target'].map(target2id).astype(int)
+        df = df[['text', 'labels']]
 
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+    # Convert to HuggingFace Dataset
     dataset = Dataset.from_pandas(df)
 
+    # Tokenization
+    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+    
     def tokenize_function(examples):
-        return tokenizer(examples['text'], padding="max_length", truncation=True)
+        return tokenizer(
+            examples['text'],
+            padding="max_length",
+            truncation=True,
+            max_length=128
+        )
 
-    dataset = dataset.train_test_split(test_size=0.2)
     dataset = dataset.map(tokenize_function, batched=True)
+    dataset = dataset.remove_columns(['text'])  # Remove original text column
+    
+    # Train-test split
+    dataset = dataset.train_test_split(test_size=0.2, seed=42)
 
     if binary_bias:
-        dataset['train'] = dataset['train'].rename_column("bias", "labels")
-        dataset['test'] = dataset['test'].rename_column("bias", "labels")
         return dataset
     else:
-        return dataset, target_labels, target2id, None
+        return dataset, target_labels, target2id, id2target
